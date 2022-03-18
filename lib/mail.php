@@ -1,6 +1,5 @@
 <?php
-
-require_once('../cfg/config.php');
+require_once "config.php";
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 require '../vendor/autoload.php';
@@ -47,7 +46,7 @@ function enviarMailActivacio($email, $activationCode)
     $mail->MsgHTML($message);
     
     //Destinatari
-    //$address = 'phpCientics2@gmail.com';
+    //$address = 'hervashf137@gmail.com';
     $address = $email;
 
     $mail->AddAddress($address, 'Active User');
@@ -101,7 +100,7 @@ function enviarMailResetPassword($email, $resetPassCode)
     </html>';
     $mail->MsgHTML($message);
     //Destinatari
-    //$address = 'phpcientics2@gmail.com';
+    //$address = 'hervashf137@gmail.com';
     $address = $email;
     $mail->AddAddress($address, 'Reset Pass User');
 
@@ -110,8 +109,55 @@ function enviarMailResetPassword($email, $resetPassCode)
     if(!$result){
         echo 'Error: ' . $mail->ErrorInfo;
     }else echo "Correu enviat";
-    echo '<script type="text/javascript">window.location.assign("../home.php");</script>';
+    echo '<script type="text/javascript">window.location.assign("../home.php");</script>';  
+}
 
+function enviarMailResetPasswordSuccesful($email)
+{
+
+    $mail = new PHPMailer();
+    $mail->IsSMTP();
+
+    //Configuració del servidor de Correu
+    //Modificar a 0 per eliminar msg error
+    $mail->SMTPDebug = SMTPDEBUG;
+    $mail->SMTPAuth = SMTPAUTH;
+    $mail->SMTPSecure = SMTPSECURE;
+    $mail->Host = HOST;
+    $mail->Port = PORT;
     
+    //Credencials del compte GMAIL
+    $mail->Username = TUCORREO;
+    $mail->Password = TUPSWCORREO;
+
+    //Dades del correu electrònic
+    $mail->SetFrom(TUCORREO, 'Cinetics - David Delgado (Administrador)');
+    $mail->Subject = 'Reset Password';
+    $mail->isHTML(true);
+    $message = '
+    <html>
+        <body>
+            <head>
+                <title>Reset Pasword</title>
+            </head>
+            </hr>
+            <strong>Your password has been modified succesfuly!!!</strong>
+            <br>
+            <hr>
+            <img src="https://www.pngplay.com/wp-content/uploads/13/Money-Heist-Mask-Free-PNG.png" width="75" height="75">
+        </body>
+    </html>';
+    $mail->MsgHTML($message);
+    //Destinatari
+    $address = 'hervashf137@gmail.com';
+    //$address = $email;
+    $mail->AddAddress($address, 'Reset Pass User');
+
+    //Enviament
+    $result = $mail->Send();
+    if(!$result){
+        echo 'Error: ' . $mail->ErrorInfo;
+    }else echo "Correu enviat";
+    echo '<script type="text/javascript">window.location.assign("../home.php");</script>';  
 }
 ?>

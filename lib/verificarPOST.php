@@ -9,44 +9,57 @@ $password = null;
 $verifyPassword = null;
 $activationDate = null;
 $activationCode = null;
+$emailErr = null;
+$errPsw = null;
 
-if (isset($_POST["username"]) && !is_numeric($_POST["username"]) && strlen($_POST["username"]) <= 16 && strlen($_POST["username"]) > 0 && ctype_space($_POST["username"]) == false)
+if (isset($_POST["username"]) && ctype_alnum($_POST["username"]))
 {
     $username = filter_input(INPUT_POST, "username");
 }
 
-if (isset($_POST["email"]) && !is_numeric($_POST["email"]) && strlen($_POST["email"]) <= 40 && ctype_space($_POST["email"]) == false)
-{
-    $email = filter_input(INPUT_POST, "email");
-}
+if (empty($_POST["email"])) {
+    $emailErr = "Email is required";
+    header("Location: ../register.php?error=$emailErr");
+    exit;
+  } else {
+    if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+      $emailErr = "Invalid email format";
+      header("Location: ../register.php?error=$emailErr");
+      exit;
+    }else{
+        $email = filter_input(INPUT_POST, "email");
+    }
+  }
 
 
-if (isset($_POST["firstname"]) && !is_numeric($_POST["firstname"]) && strlen($_POST["firstname"]) <= 60 && ctype_alpha($_POST["firstname"]) && ctype_space($_POST["firstname"]) == false)
+if (isset($_POST["firstname"]) && !is_numeric($_POST["firstname"]))
 {
     $firstName = filter_input(INPUT_POST, "firstname");
 }
 
-if (isset($_POST["lastname"]) && !is_numeric($_POST["lastname"]) && strlen($_POST["lastname"]) <= 120 && ctype_alpha($_POST["lastname"]) && ctype_space($_POST["lastname"]) == false)
+if (isset($_POST["lastname"]) && !is_numeric($_POST["lastname"]))
 {
     $lastName = filter_input(INPUT_POST, "lastname"); 
 }
 
 
-if (isset($_POST["password"]) && strlen($_POST["password"]) <= 60 && ctype_space($_POST["password"]) == false)
+if (isset($_POST["password"]) && ctype_space($_POST["password"]) == false)
 {
-    $password = filter_input(INPUT_POST, "password"); 
-}
+    $password = filter_input(INPUT_POST, "password");
 
-if (isset($_POST["verifypassword"]) && strlen($_POST["verifypassword"]) <= 60 && ctype_space($_POST["verifypassword"]) == false)
-{
-    $verifyPassword = filter_input(INPUT_POST, "verifypassword"); 
+    if (isset($_POST["verifypassword"]) && ctype_space($_POST["verifypassword"]) == false)
+    {
+        $verifyPassword = filter_input(INPUT_POST, "verifypassword"); 
+    }
 }
 
 if (!is_null($username) && !is_null($email) && !is_null($firstName) && !is_null($lastName) && !is_null($password) && !is_null($verifyPassword))
 {
     if ($password != $verifyPassword)
     {
-        header("Location: ../register.php"); //Et retorna al formulari de registre
+        $errPsw = "Las passwords no coinciden o no están introducidas";
+        header("Location: ../register.php?errorPsw=$errPsw");
+        exit;
     }
     else 
     {

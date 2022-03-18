@@ -1,6 +1,6 @@
 <?php 
-    include("./mail.php");
-    include_once("../cfg/config.php");
+    include "mail.php";
+    require_once "config.php";
 
     function openDB(){
         $cadenaConnexio = CADENABD;
@@ -17,7 +17,10 @@
         }
         return $db;
     }
-
+    ///////////////////////////********************************************////////////////////////////
+    ///////////////////////////FUNCIONES USUARIO////////////////////////////
+    ///////////////////////////********************************************////////////////////////////
+    ///////////////////////////********************************************////////////////////////////
     function crearUsuario($email, $username, $password, $firstName, $lastName, $activationCode){
         $db = openDB();
     
@@ -42,7 +45,7 @@
 
     function obtenirUsuari($username){
         $db = openDB();
-        $sql = 'SELECT username, mail, passHash FROM `users` WHERE (`username` = ? OR `mail` = ?) and active = 1';
+        $sql = 'SELECT id, username, mail, passHash FROM `users` WHERE (`username` = ? OR `mail` = ?) and active = 1';
         $usuaris = $db->prepare($sql);
         $usuaris->execute(array($username, $username));
 
@@ -86,7 +89,10 @@
     $result->execute(array($xUsername));
     }
 
-
+    ///////////////////////////********************************************////////////////////////////
+    ///////////////////////////FUNCIONES RESET PASSWORD////////////////////////////
+    ///////////////////////////********************************************////////////////////////////
+    ///////////////////////////********************************************////////////////////////////
     function resetPassword($password, $mail, $resetCode){
         $db = openDB();
         $sql = "UPDATE `users` SET passHash = '$password', resetPassExpiry = null, resetPassCode = null WHERE `mail` = ? and resetPassCode = ?";
@@ -118,4 +124,116 @@
 
         return $expirat;
     }
+
+    ///////////////////////////********************************************////////////////////////////
+    ///////////////////////////FUNCIONES VIDEOS////////////////////////////
+    ///////////////////////////********************************************////////////////////////////
+    ///////////////////////////********************************************////////////////////////////
+        
+    function insertarVideo($titol, $hashtagArray, $descripcio, $path, $idUsuari){
+        $db = openDB();
+        $etiquetaVideo= null;
+        ///Con esta sintaxis el orden da igual
+        //INSERT ETIQUETA
+        for($i = 0; $i < count($hashtagArray); $i++){
+            $sql = 'INSERT INTO `etiqueta`(nombre)
+            VALUES(:nombre)';
+                $usuaris = $db->prepare($sql);
+                $usuaris->execute(array(':nombre'=>$hashtagArray[$i]));
+        }
+        //INSERT VIDEO
+        $sql = 'INSERT INTO `video`(titulo,descripcio,likes,dislikes,`path`,`date`,idUsuari) 
+                    VALUES(:titulo,:descripcio,0,0, :path, CURRENT_DATE(), :idUsuari)';
+            $usuaris = $db->prepare($sql);
+            $usuaris->execute(array(':titulo'=>$titol, ':descripcio'=>$descripcio, ':path'=>$path, ':idUsuari'=>$idUsuari));
+            $idVideo = $db->lastInsertId();
+        //INSERTVIDEOETIQUETA
+
+            for($i = 0; $i < count($hashtagArray); $i++){
+
+                $idEtiquetas = obtenirIdBe($hashtagArray[$i]);
+                
+                foreach ($idEtiquetas as $fila) {
+                    $etiquetaVideo = $fila['idEtiqueta'];
+                }
+                
+                $sql = 'INSERT INTO `videoetiqueta`(idEtiqueta, idVideo) VALUES(:idEtiqueta, :idVideo)';
+                    $usuaris = $db->prepare($sql);
+                    $usuaris->execute(array(':idEtiqueta'=>$etiquetaVideo, ':idVideo'=>$idVideo));
+            }
+    }
+
+    function obtenirIdBe($hashtagArrayParaula){
+        $db = openDB();
+        
+        $sql = 'SELECT idEtiqueta FROM `etiqueta` WHERE nombre = ?';
+        $usuaris = $db->prepare($sql);
+        $usuaris->execute(array($hashtagArrayParaula));
+
+        return $usuaris;
+    }
+
+    function getLastVideo(){
+        $db = openDB();
+        
+        $sql = 'SELECT * FROM `video` ORDER BY idVideo DESC LIMIT 1';
+        $video = $db->prepare($sql);
+        $video->execute();
+        //$result = $video->fetchColumn();
+
+        $data = $video;
+        foreach ($data as $row) :
+            return $row;
+        endforeach; 
+    }
+
+    ///esta vale para los dos
+    function getHashtagsVideo($xlastIdVideo)
+    {
+        $db = openDB();
+        $hastag=null;
+        $sql = 'SELECT e.nombre FROM `etiqueta` as `e` INNER JOIN `videoetiqueta` as `ve` ON e.idEtiqueta = ve.idEtiqueta WHERE ve.idVideo = ?';
+        $video = $db->prepare($sql);
+        $video->execute(array($xlastIdVideo));
+        $data = $video;
+        $i = 0;
+
+        foreach($data as $row) :
+            $hastag[$i] = $row['nombre'];
+            $i++;
+        endforeach;
+
+        return $hastag;
+    }
+
+    function getRandomVideo($idVideoNoRepetir)
+{
+    $db = openDB();
+    $totalCountVideos = getTotalqttVideos();
+    $random = rand(92, 91 + $totalCountVideos);
+
+    while($random == $idVideoNoRepetir){
+        $random = rand(92, 91 + $totalCountVideos);
+    }
+    
+    $sql = 'SELECT * FROM `video` WHERE idVideo = ?';
+    $video = $db->prepare($sql);
+    $video->execute(array($random));
+
+    $data = $video;
+    foreach ($data as $row) :
+        return $row;
+    endforeach; 
+}
+
+function getTotalqttVideos(){
+
+    $db = openDB();
+    $sql = "SELECT count(*) FROM `video`";
+    $qttVideos = $db->prepare($sql);
+    $qttVideos->execute();
+    $rows = $qttVideos->fetchColumn();
+
+    return $rows;
+}
 ?>

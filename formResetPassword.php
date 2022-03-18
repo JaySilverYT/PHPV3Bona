@@ -20,8 +20,8 @@
     <div class="row">
         <div class="col-sm-6 col-sm-offset-3">
             <p class="text-center">Use the form below to change your pºassword. Your password cannot be the same as your username.</p>
-
             <form method="POST" action="./lib/resetPassword.php">
+            
                 <input type="password" class="input-lg form-control" name="password1" placeholder="New Password" autocomplete="off">
                 <div class="row">
                 </div>

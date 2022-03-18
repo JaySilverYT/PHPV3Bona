@@ -1,5 +1,5 @@
 <?php 
-require './bbddConex.php';
+require_once './bbddConex.php';
 
 $username = false;
 $password= false; 
@@ -21,6 +21,7 @@ if ($username && $password)
             session_start();
             $_SESSION["username"]   = $fila['username'];
             $_SESSION["mail"]       = $fila['mail'];
+            $_SESSION["idUser"]     = $fila['id'];
             updateLastSingIn($username);
             header('Location: ../home.php');
             exit;

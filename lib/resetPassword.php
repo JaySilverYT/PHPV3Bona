@@ -23,7 +23,7 @@
         $mail = $_POST['mail'];
         
         resetPassword($password, $mail, $resetCode);
-
+        enviarMailResetPasswordSuccesful($mail);
         header('Location: ../index.php');
     }
 ?>
